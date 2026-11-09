@@ -1,0 +1,27 @@
+/**
+ * Getzner CD — abgeleitet von getzner.com (hell, Orange-Akzent, sachliche Typo).
+ * Illustrative Annäherung; Orange #f39200 entspricht Markenauftritt Website/Medien.
+ */
+:root {
+  --gz-orange: #f39200;
+  --gz-orange-dark: #d47f00;
+  --gz-orange-soft: #fff4e5;
+  --gz-green: #2e9d62;
+  --gz-green-soft: #e8f6ef;
+  --gz-ink: #1d242d;
+  --gz-ink-secondary: #3d4652;
+  --gz-muted: #6b7580;
+  --gz-line: #e3e7ec;
+  --gz-bg: #eef1f4;
+  --gz-surface: #ffffff;
+  --gz-surface-elevated: #ffffff;
+  --gz-shadow: 0 10px 40px rgba(29, 36, 45, 0.08);
+  --gz-radius: 10px;
+  --gz-radius-pill: 999px;
+  --gz-font: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
+  --gz-title: clamp(1.35rem, 2.2vw, 1.75rem);
+  --gz-lead: clamp(0.95rem, 1.4vw, 1.1rem);
+  --gz-body: 1rem;
+  --gz-small: 0.875rem;
+  --gz-caption: 0.8125rem;
+}

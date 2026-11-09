@@ -24,11 +24,11 @@ export function Forest() {
         <group key={i} position={[x, -0.1, z]} scale={s}>
           <mesh position={[0, 0.6, 0]} castShadow>
             <cylinderGeometry args={[0.12, 0.18, 1.2, 6]} />
-            <meshStandardMaterial color="#2a1f18" roughness={0.9} />
+            <meshStandardMaterial color="#5c4030" roughness={0.88} />
           </mesh>
           <mesh position={[0, 1.6, 0]} castShadow>
             <coneGeometry args={[0.75, 1.8, 7]} />
-            <meshStandardMaterial color="#14352a" roughness={0.85} />
+            <meshStandardMaterial color="#2d6b45" roughness={0.82} />
           </mesh>
         </group>
       ))}

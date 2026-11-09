@@ -16,16 +16,22 @@ export function WaveformChart({ protectedTrack, playing, speed }) {
       if (playing) phase.current += 0.04 + speed * 0.08;
 
       const mid = h / 2;
-      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.strokeStyle = 'rgba(107, 117, 128, 0.25)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(0, mid);
       ctx.lineTo(w, mid);
       ctx.stroke();
 
+      ctx.font = '11px Source Sans 3, sans-serif';
+      ctx.fillStyle = '#6b7580';
+      ctx.fillText('Ohne Isolation', 8, 16);
+      ctx.fillStyle = '#2e9d62';
+      ctx.fillText('Mit Getzner®', 8, h - 8);
+
       for (const [color, amp, freq] of [
-        ['#f39200', protectedTrack ? 0.35 : 1, 0.09],
-        ['#00e07a', protectedTrack ? 0.95 : 0.28, 0.07],
+        ['#f39200', protectedTrack ? 0.32 : 1, 0.09],
+        ['#2e9d62', protectedTrack ? 0.92 : 0.26, 0.07],
       ]) {
         ctx.strokeStyle = color;
         ctx.lineWidth = 2;

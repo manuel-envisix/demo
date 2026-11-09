@@ -17,8 +17,8 @@ export function Chalet({ position, rotationY, protectedTrack, trainRef, index })
     group.current.position.y = position.y + Math.sin(shake.current * 2) * near * amp * 0.5;
   });
 
-  const wall = index % 2 === 0 ? '#c4a882' : '#b89a78';
-  const roof = '#4a5568';
+  const wall = index % 2 === 0 ? '#e8dcc8' : '#dfd0b8';
+  const roof = '#6b4f4a';
 
   return (
     <group ref={group} position={position} rotation={[0, rotationY, 0]}>
@@ -33,9 +33,9 @@ export function Chalet({ position, rotationY, protectedTrack, trainRef, index })
       <mesh position={[0, 1.1, 1.41]}>
         <planeGeometry args={[0.5, 0.7]} />
         <meshStandardMaterial
-          color={protectedTrack ? '#4ad4ff' : '#ff9a6a'}
-          emissive={protectedTrack ? '#113344' : '#442211'}
-          emissiveIntensity={protectedTrack ? 0.15 : 0.45}
+          color={protectedTrack ? '#a8d4f0' : '#ffc9a8'}
+          emissive={protectedTrack ? '#223344' : '#553322'}
+          emissiveIntensity={protectedTrack ? 0.08 : 0.22}
         />
       </mesh>
       <mesh position={[-0.9, 1.3, 1.41]}>

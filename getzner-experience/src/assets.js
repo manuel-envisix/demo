@@ -31,7 +31,7 @@ export const PRODUCTS = [
     image: GETZNER.sylomerSamples,
     thumb: GETZNER.sylomerSamples,
     url: 'https://www.getzner.com/en/products/sylomer',
-    placement: 'Werkstoff der Schwellensohle / definierte Federkennlinien',
+    placement: 'Werkstoff der Schwellensohle',
     blurb: 'Bewährtes Polyurethan-Elastomer — in dieser Demo als Material der Schwellensohle dargestellt.',
     alternative: true,
   },
@@ -41,8 +41,8 @@ export const PRODUCTS = [
     image: GETZNER.sylodynSamples,
     thumb: GETZNER.sylodynSamples,
     url: 'https://www.getzner.com/en/products/sylodyn',
-    placement: 'Alternative bei höheren Punktlasten (z. B. Baseplate Pads)',
-    blurb: 'Höhere dynamische Steifigkeit — alternative Lösung, hier nicht gleichzeitig mit Sohle verbaut.',
+    placement: 'Alternative bei höheren Punktlasten',
+    blurb: 'Höhere dynamische Steifigkeit — separates Anwendungsszenario.',
     alternative: true,
   },
   {
@@ -51,8 +51,8 @@ export const PRODUCTS = [
     image: GETZNER.insertionPads,
     thumb: GETZNER.insertionPads,
     url: 'https://www.getzner.com/en-us/products/rail-products/elastic-insertion-pads-for-sleeper-boots',
-    placement: 'Zusätzliche Elastizität in Schwellenschuhen (Fertigbeton)',
-    blurb: 'Ergänzende Einlagen im Sonneville-LVT-System — alternative Konfiguration.',
+    placement: 'Zusätzliche Elastizität im Schwellenschuh',
+    blurb: 'Ergänzung im Fertigbetonoberbau — alternative Konfiguration.',
     alternative: true,
   },
   {
@@ -61,8 +61,11 @@ export const PRODUCTS = [
     image: GETZNER.massSpring,
     thumb: GETZNER.massSpring,
     url: 'https://www.getzner.com/media/850/download/Brochure%20Mass-Spring%20Systems%20EN.pdf?v=3',
-    placement: 'Entkoppelte Masse — anderer Anwendungsfall',
-    blurb: 'Systemlösung für höchsten Körperschallschutz, nicht als Einzelsohle modelliert.',
+    placement: 'Systemlösung — anderer Anwendungsfall',
+    blurb: 'Höchster Körperschallschutz auf Systemebene.',
     alternative: true,
   },
 ];
+
+export const PRIMARY_PRODUCT = PRODUCTS[0];
+export const ALTERNATIVE_PRODUCTS = PRODUCTS.filter((p) => p.alternative);

@@ -23,9 +23,9 @@ export function VibrationField({
     () =>
       Array.from({ length: RING_COUNT }, () =>
         new THREE.MeshBasicMaterial({
-          color: protectedTrack ? '#00c96e' : '#ff6b4a',
+          color: protectedTrack ? '#2e9d62' : '#f39200',
           transparent: true,
-          opacity: 0.35,
+          opacity: protectedTrack ? 0.28 : 0.32,
           side: THREE.DoubleSide,
           depthWrite: false,
         })

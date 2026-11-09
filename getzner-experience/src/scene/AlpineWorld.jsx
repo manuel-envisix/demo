@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Sky, Stars } from '@react-three/drei';
+import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
 import { trackFrame, trackOrientation, TRACK_LEN } from '../track.js';
 import { TrackExplosionAnchor } from './TrackExplosionAnchor.jsx';
@@ -25,7 +25,7 @@ function AlpineTerrain() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.85, 0]} receiveShadow>
       <planeGeometry args={[160, 160, 1, 1]} />
-      <meshStandardMaterial color="#121820" roughness={0.98} metalness={0.02} />
+      <meshStandardMaterial color="#7a9b62" roughness={0.92} metalness={0.02} />
     </mesh>
   );
 }
@@ -41,7 +41,7 @@ function Mountains() {
   return peaks.map(([x, y, z, s], i) => (
     <mesh key={i} position={[x, y, z]} scale={[s, s * 1.35, s]} castShadow>
       <coneGeometry args={[1, 1, 5]} />
-      <meshStandardMaterial color="#3d4d5c" roughness={0.88} />
+      <meshStandardMaterial color="#8fa3b8" roughness={0.82} />
     </mesh>
   ));
 }
@@ -89,13 +89,13 @@ export function AlpineWorld() {
 
   return (
     <>
-      <color attach="background" args={['#070a10']} />
-      <fog attach="fog" args={['#070a10', 28, 110]} />
-      <ambientLight intensity={0.38} />
+      <color attach="background" args={['#c8ddf0']} />
+      <fog attach="fog" args={['#d4e4f4', 55, 180]} />
+      <ambientLight intensity={0.62} />
       <directionalLight
-        position={[-30, 45, 20]}
-        intensity={1.1}
-        color="#ffb070"
+        position={[-28, 52, 24]}
+        intensity={1.55}
+        color="#fff4e8"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-far={140}
@@ -104,17 +104,16 @@ export function AlpineWorld() {
         shadow-camera-top={50}
         shadow-camera-bottom={-50}
       />
-      <directionalLight position={[40, 20, -30]} intensity={0.35} color="#6a8cff" />
-      <hemisphereLight args={['#3a4a6a', '#0a1018', 0.55]} />
+      <directionalLight position={[35, 28, -40]} intensity={0.45} color="#e8f0ff" />
+      <hemisphereLight args={['#b8daf8', '#5a6b48', 0.72]} />
       <Sky
         distance={450000}
-        sunPosition={[-1, 0.15, -0.8]}
-        inclination={0.49}
-        azimuth={0.25}
-        mieCoefficient={0.01}
-        turbidity={8}
+        sunPosition={[0.8, 0.55, -0.4]}
+        inclination={0.52}
+        azimuth={0.18}
+        mieCoefficient={0.004}
+        turbidity={2.5}
       />
-      <Stars radius={120} depth={50} count={1200} factor={3} saturation={0.2} fade speed={0.3} />
 
       <CameraDirector mode={cameraMode} target={trainRef} playing={playing} />
 
