@@ -1,4 +1,5 @@
 node_modules
+getzner-experience/dist
 .next
 .env
 .env.*
