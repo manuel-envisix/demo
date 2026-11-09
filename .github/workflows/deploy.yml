@@ -3,7 +3,7 @@ name: Deploy ring-demo
 on:
   push:
     branches:
-      - cursor/ring-buehne-da52
+      - main
   workflow_dispatch:
 
 permissions:
