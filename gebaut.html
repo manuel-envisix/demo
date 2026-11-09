@@ -143,6 +143,81 @@ input[type="range"] {
 .section-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 .section-banner.red { color: #f0a090; }
 .section-banner.green { color: var(--getzner-light); }
+.mode-panel {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.mode-state {
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.4s;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.7);
+}
+.mode-state.ohne { color: #e88a6a; }
+.mode-state.mit { color: var(--getzner-light); }
+.mode-toggle {
+  display: flex;
+  width: min(100%, 480px);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid rgba(244, 240, 230, 0.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+.mode-toggle button {
+  flex: 1;
+  cursor: pointer;
+  border: none;
+  padding: clamp(14px, 2.5vh, 22px) clamp(12px, 2vw, 24px);
+  font-size: clamp(0.95rem, 2vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  transition: background 0.35s, color 0.35s, transform 0.2s;
+  color: rgba(244, 240, 230, 0.55);
+  background: rgba(20, 22, 20, 0.85);
+}
+.mode-toggle button:hover { color: var(--paper); }
+.mode-toggle button.active-ohne {
+  background: linear-gradient(135deg, #8b3a28, #c45c3e);
+  color: #fff;
+}
+.mode-toggle button.active-mit {
+  background: linear-gradient(135deg, #2a6b4a, var(--getzner));
+  color: #fff;
+}
+.mode-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.house-meter {
+  background: rgba(10, 12, 11, 0.75);
+  border: 1px solid rgba(244, 240, 230, 0.15);
+  border-radius: 10px;
+  padding: 10px 16px;
+  min-width: 140px;
+  backdrop-filter: blur(8px);
+}
+.house-meter label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.house-meter .val {
+  font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+  font-weight: 800;
+}
+.house-meter .val.high { color: #e88a6a; }
+.house-meter .val.low { color: var(--getzner-light); }
 </style>
 <script type="importmap">
 {
@@ -159,25 +234,22 @@ input[type="range"] {
   <div class="hud-top">
     <div class="brand">
       <h1>Getzner <span>Schwingungsschutz</span></h1>
-      <p>2 × 1 km Strecke · 3D Gleislagerungs-Demo</p>
+      <p>Vorher-Nachher · Zugdemo am Nachbarhaus</p>
     </div>
-    <div class="meters">
-      <div class="meter">
-        <label>Schwingung Pegel</label>
-        <span class="val high" id="dbVal">72 dB</span>
-        <div class="zone a" id="zoneLabel">Ohne Getzner</div>
-      </div>
-      <div class="meter">
-        <label>Nachbarhaus</label>
-        <span class="val high" id="houseVal">Stark belastet</span>
-      </div>
+    <div class="house-meter">
+      <label>Nachbarhaus</label>
+      <span class="val high" id="houseVal">Stark belastet</span>
     </div>
   </div>
-  <div class="hud-bottom">
-    <div class="legend">
-      <span><i class="swatch r"></i> km 0–1: ohne Gleislagerung</span>
-      <span><i class="swatch g"></i> km 1–2: mit Getzner-Matte</span>
+  <div class="mode-panel">
+    <div class="mode-state ohne" id="modeState">Ohne Getzner</div>
+    <div class="mode-toggle" id="modeToggle" role="group" aria-label="Getzner Modus">
+      <button type="button" id="btnOhne" class="active-ohne">Ohne Getzner</button>
+      <button type="button" id="btnMit">Mit Getzner</button>
     </div>
+    <span class="mode-hint">Umschalten · Leertaste</span>
+  </div>
+  <div class="hud-bottom">
     <div class="controls">
       <label for="speed">Geschwindigkeit</label>
       <input type="range" id="speed" min="30" max="160" value="80" step="5">
@@ -198,19 +270,24 @@ const GETZNER_DARK = 0x2a6b4a;
 
 const speedEl = document.getElementById("speed");
 const speedDisp = document.getElementById("speedDisp");
-const dbVal = document.getElementById("dbVal");
 const houseVal = document.getElementById("houseVal");
-const zoneLabel = document.getElementById("zoneLabel");
+const modeState = document.getElementById("modeState");
+const btnOhne = document.getElementById("btnOhne");
+const btnMit = document.getElementById("btnMit");
 const banner = document.getElementById("banner");
 const camFollow = document.getElementById("camFollow");
 const camSide = document.getElementById("camSide");
 const canvas = document.getElementById("viewport");
 
-let trainZ = 0;
-let lastBanner = "";
-let cameraMode = "follow";
+let trainZ = KM * 0.35;
+let cameraMode = "side";
 let wobbleT = 0;
 let ripplePool = [];
+let getznerOn = false;
+let modeBlend = 0;
+const elastomers = [];
+const houseWindows = [];
+let groundStressStrip = null;
 
 function kmh() { return Number(speedEl.value); }
 function mPerSec() { return kmh() / 3.6; }
@@ -229,6 +306,35 @@ camSide.addEventListener("click", () => {
   camSide.classList.add("active");
   camFollow.classList.remove("active");
 });
+camSide.classList.add("active");
+camFollow.classList.remove("active");
+
+function applyModeUI() {
+  btnOhne.classList.toggle("active-ohne", !getznerOn);
+  btnMit.classList.toggle("active-mit", getznerOn);
+  modeState.textContent = getznerOn ? "Mit Getzner" : "Ohne Getzner";
+  modeState.className = "mode-state " + (getznerOn ? "mit" : "ohne");
+  const lbl = getznerOn ? "Mit Getzner — Haus geschützt" : "Ohne Getzner — starke Erschütterung";
+  banner.textContent = lbl;
+  banner.className = "section-banner show " + (getznerOn ? "green" : "red");
+  setTimeout(() => banner.classList.remove("show"), 1600);
+}
+
+function setGetzner(on) {
+  if (getznerOn === on) return;
+  getznerOn = on;
+  applyModeUI();
+}
+
+btnOhne.addEventListener("click", () => setGetzner(false));
+btnMit.addEventListener("click", () => setGetzner(true));
+window.addEventListener("keydown", (e) => {
+  if (e.code !== "Space") return;
+  const tag = e.target && e.target.tagName;
+  if (tag && /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(tag)) return;
+  e.preventDefault();
+  setGetzner(!getznerOn);
+});
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -243,8 +349,8 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87b8d8);
 scene.fog = new THREE.Fog(0xa8c8e0, 80, 420);
 
-const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.5, 600);
-camera.position.set(-8, 5, -15);
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.5, 600);
+camera.position.set(14, 4.5, 8);
 
 const hemi = new THREE.HemisphereLight(0xc8e4ff, 0x3a5a30, 0.55);
 scene.add(hemi);
@@ -273,21 +379,13 @@ function makeGround() {
   ground.receiveShadow = true;
   groundGroup.add(ground);
 
-  const stripR = new THREE.Mesh(
-    new THREE.PlaneGeometry(KM, 18),
-    new THREE.MeshLambertMaterial({ color: 0x5a4038, emissive: 0x401810, emissiveIntensity: 0.08 })
+  groundStressStrip = new THREE.Mesh(
+    new THREE.PlaneGeometry(TOTAL, 20),
+    new THREE.MeshLambertMaterial({ color: 0x5a4038, emissive: 0x401810, emissiveIntensity: 0.1 })
   );
-  stripR.rotateX(-Math.PI / 2);
-  stripR.position.set(KM / 2, 0.02, 14);
-  groundGroup.add(stripR);
-
-  const stripG = new THREE.Mesh(
-    new THREE.PlaneGeometry(KM, 18),
-    new THREE.MeshLambertMaterial({ color: 0x3a6048, emissive: 0x103820, emissiveIntensity: 0.06 })
-  );
-  stripG.rotateX(-Math.PI / 2);
-  stripG.position.set(KM + KM / 2, 0.02, 14);
-  groundGroup.add(stripG);
+  groundStressStrip.rotateX(-Math.PI / 2);
+  groundStressStrip.position.set(TOTAL / 2, 0.02, 12);
+  groundGroup.add(groundStressStrip);
 }
 makeGround();
 
@@ -301,14 +399,15 @@ const elastMat = new THREE.MeshStandardMaterial({
   color: GETZNER,
   roughness: 0.7,
   emissive: GETZNER_DARK,
-  emissiveIntensity: 0.15
+  emissiveIntensity: 0.22,
+  transparent: true,
+  opacity: 0
 });
 
 const sleeperStep = 0.65;
 const sleepers = [];
 
 for (let z = -20; z < TOTAL + 20; z += sleeperStep) {
-  const inG = z >= KM;
   const sw = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.12, 0.22), sleeperMat);
   sw.position.set(0, 0.18, z);
   sw.castShadow = true;
@@ -321,11 +420,12 @@ for (let z = -20; z < TOTAL + 20; z += sleeperStep) {
   bal.receiveShadow = true;
   trackGroup.add(bal);
 
-  if (inG && z % 1.3 < sleeperStep) {
-    const el = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.06, 0.35), elastMat);
-    el.position.set(0, 0.06, z);
+  if (z % 1.3 < sleeperStep) {
+    const el = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.07, 0.38), elastMat.clone());
+    el.position.set(0, 0.055, z);
     el.receiveShadow = true;
     trackGroup.add(el);
+    elastomers.push(el);
   }
 }
 
@@ -412,7 +512,7 @@ for (let c = 0; c < 3; c++) {
 }
 
 const house = new THREE.Group();
-house.position.set(11, 0, 8);
+house.position.set(9, 0, 10);
 scene.add(house);
 
 const houseBase = new THREE.Mesh(new THREE.BoxGeometry(5, 3.2, 4.5), new THREE.MeshStandardMaterial({ color: 0xd8d0c4 }));
@@ -428,6 +528,16 @@ house.add(roof);
 const door = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.6, 0.1), new THREE.MeshStandardMaterial({ color: 0x3a3028 }));
 door.position.set(0, 0.8, 2.26);
 house.add(door);
+for (const wx of [-1.4, 0.5, 1.5]) {
+  const hwnd = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.85, 0.75),
+    new THREE.MeshStandardMaterial({ color: 0xa8d4f0, emissive: 0x335566, emissiveIntensity: 0.25 })
+  );
+  hwnd.position.set(0, 1.85, 2.28);
+  hwnd.position.x = wx;
+  house.add(hwnd);
+  houseWindows.push({ mesh: hwnd, bx: wx, by: 1.85, bz: 2.28 });
+}
 
 const trees = new THREE.Group();
 scene.add(trees);
@@ -468,70 +578,80 @@ for (let i = 0; i < 12; i++) {
 const rippleGroup = new THREE.Group();
 scene.add(rippleGroup);
 
-function spawnRipple(z) {
-  if (ripplePool.length > 12) return;
+function spawnRipple(z, towardHouse) {
+  const stress = 1 - modeBlend;
+  if (stress < 0.15) return;
+  const maxR = stress > 0.7 ? 22 : 10;
+  if (ripplePool.length > maxR) return;
   const ring = new THREE.Mesh(
-    new THREE.RingGeometry(0.3, 0.5, 24),
-    new THREE.MeshBasicMaterial({ color: 0xe07050, transparent: true, opacity: 0.65, side: THREE.DoubleSide })
+    new THREE.RingGeometry(0.35, 0.55, 28),
+    new THREE.MeshBasicMaterial({
+      color: towardHouse ? 0xe06040 : 0xe09060,
+      transparent: true,
+      opacity: 0.55 * stress,
+      side: THREE.DoubleSide
+    })
   );
   ring.rotation.x = -Math.PI / 2;
-  ring.position.set(0, 0.05, z);
+  const ox = towardHouse ? 2 + Math.random() * 5 : (Math.random() - 0.5) * 1.2;
+  const oz = z + (towardHouse ? 3 + Math.random() * 6 : (Math.random() - 0.5) * 2);
+  ring.position.set(ox, 0.06, oz);
   rippleGroup.add(ring);
-  ripplePool.push({ mesh: ring, age: 0 });
+  ripplePool.push({ mesh: ring, age: 0, spread: towardHouse ? 5.5 : 3.2 });
 }
 
-function sectionAt(z) {
-  return z < KM ? "ohne" : "mit";
+function trackYOffset(z, t, stress) {
+  const v = Math.min(1, kmh() / 120);
+  const harsh = Math.sin(z * 0.15 + t * 8) * 0.055 * v + Math.sin(z * 0.4 + t * 12) * 0.028 * v;
+  const calm = Math.sin(z * 0.08 + t * 2) * 0.003;
+  return THREE.MathUtils.lerp(harsh, calm, modeBlend);
 }
 
-function trackYOffset(z, t) {
-  if (sectionAt(z) === "ohne") {
-    const v = Math.min(1, kmh() / 120);
-    return Math.sin(z * 0.15 + t * 8) * 0.04 * v + Math.sin(z * 0.4 + t * 12) * 0.02 * v;
-  }
-  return Math.sin(z * 0.08 + t * 2) * 0.003;
+function updateHud() {
+  const stress = 1 - modeBlend;
+  houseVal.textContent = stress > 0.45 ? "Stark belastet" : stress > 0.15 ? "Spürbar" : "Ruhig";
+  houseVal.className = "val " + (stress > 0.35 ? "high" : "low");
 }
 
-function updateMeters(z) {
-  const ohne = sectionAt(z) === "ohne";
-  const base = ohne ? 68 : 38;
-  const var_ = ohne ? Math.sin(wobbleT * 6) * 4 + 4 : Math.sin(wobbleT * 2) * 1;
-  const db = Math.round(base + var_ + kmh() * 0.02);
-  dbVal.textContent = db + " dB";
-  dbVal.className = "val " + (ohne ? "high" : "low");
-  zoneLabel.textContent = ohne ? "Ohne Getzner" : "Mit Getzner Schwingungsschutz";
-  zoneLabel.className = "zone " + (ohne ? "a" : "b");
-  houseVal.textContent = ohne ? "Stark belastet" : "Ruhig";
-  houseVal.className = "val " + (ohne ? "high" : "low");
-
-  const lbl = ohne ? "Ohne Getzner — starke Erschütterung" : "Mit Getzner — geschützt";
-  if (lbl !== lastBanner) {
-    lastBanner = lbl;
-    banner.textContent = lbl;
-    banner.className = "section-banner show " + (ohne ? "red" : "green");
-    setTimeout(() => banner.classList.remove("show"), 1800);
-  }
-}
-
-function updateHouse(z, dt) {
-  const ohne = sectionAt(z) === "ohne";
+function updateVisuals(z, dt) {
+  const stress = 1 - modeBlend;
   const v = kmh() / 120;
-  if (ohne) {
-    const s = v * (8 + Math.sin(wobbleT * 5) * 3);
-    house.rotation.z = Math.sin(wobbleT * 4.2) * 0.025 * v;
-    house.rotation.x = Math.cos(wobbleT * 3.7) * 0.012 * v;
-    house.position.x = 11 + Math.sin(wobbleT * 6) * 0.08 * v;
-    house.position.y = Math.abs(Math.sin(wobbleT * 8)) * 0.06 * v;
-    groundGroup.rotation.z = Math.sin(wobbleT * 7) * 0.002 * v;
-    if (Math.random() < 0.12 * v) spawnRipple(z + 2);
-  } else {
-    house.rotation.z *= 0.92;
-    house.rotation.x *= 0.92;
-    house.position.x = THREE.MathUtils.lerp(house.position.x, 11, 0.1);
-    house.position.y = THREE.MathUtils.lerp(house.position.y, 0, 0.15);
-    groundGroup.rotation.z *= 0.9;
+
+  if (groundStressStrip) {
+    const m = groundStressStrip.material;
+    m.color.set(0x5a4038).lerp(new THREE.Color(0x3a6048), modeBlend);
+    m.emissive.set(0x401810).lerp(new THREE.Color(0x103820), modeBlend);
+    m.emissiveIntensity = THREE.MathUtils.lerp(0.12, 0.04, modeBlend);
   }
-  house.position.z = z + 5;
+
+  for (const el of elastomers) {
+    el.material.opacity = modeBlend * 0.92;
+    el.material.emissiveIntensity = 0.08 + modeBlend * 0.2;
+    el.visible = modeBlend > 0.02;
+  }
+
+  const shake = stress * v;
+  house.rotation.z = Math.sin(wobbleT * 4.2) * 0.038 * shake;
+  house.rotation.x = Math.cos(wobbleT * 3.7) * 0.02 * shake;
+  const houseHomeX = 9;
+  house.position.x = houseHomeX + Math.sin(wobbleT * 6) * 0.14 * shake;
+  house.position.y = Math.abs(Math.sin(wobbleT * 8)) * 0.1 * shake;
+  groundGroup.rotation.z = Math.sin(wobbleT * 7) * 0.004 * shake;
+  trackGroup.position.y = Math.sin(wobbleT * 9) * 0.015 * shake;
+
+  for (const w of houseWindows) {
+    const j = shake * 0.04;
+    w.mesh.position.x = w.bx + Math.sin(wobbleT * 11 + w.bx) * j;
+    w.mesh.position.y = w.by + Math.cos(wobbleT * 13) * j * 0.8;
+  }
+
+  if (shake > 0.2) {
+    if (Math.random() < 0.22 * shake) spawnRipple(z, false);
+    if (Math.random() < 0.14 * shake) spawnRipple(z, true);
+  }
+
+  house.position.z = z + 6;
+  updateHud();
 }
 
 let last = performance.now();
@@ -544,20 +664,22 @@ function animate(now) {
   trainZ += mPerSec() * dt;
   if (trainZ > TOTAL) trainZ -= TOTAL;
 
-  const yo = trackYOffset(trainZ, wobbleT);
+  modeBlend = THREE.MathUtils.lerp(modeBlend, getznerOn ? 1 : 0, dt * 2.8);
+  const stress = 1 - modeBlend;
+
+  const yo = trackYOffset(trainZ, wobbleT, stress);
   train.position.set(0, 0.32 + yo, trainZ);
-  const bob = sectionAt(trainZ) === "ohne" ? Math.sin(wobbleT * 10) * 0.02 * (kmh() / 100) : 0;
+  const bob = stress * Math.sin(wobbleT * 10) * 0.035 * (kmh() / 100);
   train.rotation.x = bob;
 
-  updateHouse(trainZ, dt);
-  updateMeters(trainZ);
+  updateVisuals(trainZ, dt);
 
   for (let i = ripplePool.length - 1; i >= 0; i--) {
     const r = ripplePool[i];
     r.age += dt;
-    const s = 1 + r.age * 4;
+    const s = 1 + r.age * r.spread;
     r.mesh.scale.set(s, s, 1);
-    r.mesh.material.opacity = Math.max(0, 0.65 - r.age * 0.5);
+    r.mesh.material.opacity = Math.max(0, (0.55 * stress) - r.age * 0.45);
     if (r.age > 1.3) {
       rippleGroup.remove(r.mesh);
       r.mesh.geometry.dispose();
@@ -570,12 +692,13 @@ function animate(now) {
   hills.position.z = -trainZ * 0.008;
 
   if (cameraMode === "follow") {
-    const target = new THREE.Vector3(0, 1.8, trainZ - 6);
-    camera.position.lerp(new THREE.Vector3(-5, 4.2, trainZ - 22), 0.08);
+    const target = new THREE.Vector3(4, 2.2, trainZ + 10);
+    camera.position.lerp(new THREE.Vector3(-6, 5, trainZ - 18), 0.08);
     camera.lookAt(target);
   } else {
-    camera.position.lerp(new THREE.Vector3(16, 3.5, trainZ + 4), 0.06);
-    camera.lookAt(0, 1.2, trainZ + 8);
+    const target = new THREE.Vector3(2, 2.4, trainZ + 9);
+    camera.position.lerp(new THREE.Vector3(13, 4.8, trainZ + 2), 0.07);
+    camera.lookAt(target);
   }
 
   sun.position.x = 40 + trainZ * 0.02;
