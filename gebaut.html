@@ -102,8 +102,10 @@ canvas#scene {
 .house-panel {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+  align-self: stretch;
+  min-height: 0;
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 1rem;
@@ -117,7 +119,9 @@ canvas#scene {
 }
 svg#house {
   width: 100%;
-  max-height: 45vh;
+  flex: 1 1 auto;
+  min-height: 26vh;
+  max-height: min(62vh, 100%);
   overflow: visible;
 }
 .house-state {
@@ -150,13 +154,16 @@ svg#house {
   </div>
   <aside class="house-panel">
     <h2>Nachbarhaus an der Strecke</h2>
-    <svg id="house" viewBox="0 0 200 220" aria-label="Haus">
+    <svg id="house" viewBox="-30 5 260 265" preserveAspectRatio="xMidYMid meet" aria-label="Haus">
       <g id="houseGroup">
-        <rect x="40" y="100" width="120" height="90" fill="#2a2824" stroke="#f4f0e6" stroke-width="2"/>
-        <polygon points="100,35 160,100 40,100" fill="#3a3630" stroke="#f39500" stroke-width="2"/>
-        <rect x="75" y="130" width="30" height="60" fill="#1a1814" stroke="#b7b0a4"/>
-        <rect x="120" y="125" width="28" height="28" fill="#1a1814" stroke="#b7b0a4"/>
-        <rect x="52" y="125" width="28" height="28" fill="#1a1814" stroke="#b7b0a4"/>
+        <rect x="28" y="108" width="144" height="108" fill="#2a2824" stroke="#f4f0e6" stroke-width="2.5"/>
+        <polygon points="100,28 188,108 12,108" fill="#3a3630" stroke="#f39500" stroke-width="2.5"/>
+        <rect x="78" y="148" width="36" height="68" fill="#1a1814" stroke="#b7b0a4" stroke-width="1.5"/>
+        <rect x="126" y="132" width="34" height="34" fill="#1a1814" stroke="#b7b0a4" stroke-width="1.5"/>
+        <rect x="40" y="132" width="34" height="34" fill="#1a1814" stroke="#b7b0a4" stroke-width="1.5"/>
+        <rect x="40" y="178" width="34" height="34" fill="#1a1814" stroke="#b7b0a4" stroke-width="1.5"/>
+        <rect x="126" y="178" width="34" height="34" fill="#1a1814" stroke="#b7b0a4" stroke-width="1.5"/>
+        <line x1="28" y1="216" x2="172" y2="216" stroke="#b7b0a4" stroke-width="2" opacity="0.5"/>
       </g>
     </svg>
     <p class="house-state wobble" id="houseState">Wackelt — ungelagerter Abschnitt</p>
@@ -298,7 +305,11 @@ svg#house {
       dy = Math.cos(wobblePhase * 2.3) * (4 + s * 8);
       rot = Math.sin(wobblePhase * 1.5) * (1.2 + s * 2);
     }
-    houseGroup.setAttribute("transform", "translate(" + (100 + dx) + "," + (110 + dy) + ") rotate(" + rot + " 100 110)");
+    const pivotX = 100, pivotY = 148;
+    houseGroup.setAttribute(
+      "transform",
+      "translate(" + dx + "," + dy + ") rotate(" + rot + " " + pivotX + " " + pivotY + ")"
+    );
     if (shake) {
       houseState.textContent = "Wackelt — ungelagerter Abschnitt";
       houseState.className = "house-state wobble";
