@@ -1,0 +1,21 @@
+services:
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    networks:
+      - proxy
+    volumes:
+      - ./site:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.ring-demo.rule=Host(`ring-demo.envisix.at`)
+      - traefik.http.routers.ring-demo.entrypoints=websecure
+      - traefik.http.routers.ring-demo.tls=true
+      - traefik.http.routers.ring-demo.tls.certresolver=letsencrypt-dns
+      - traefik.http.services.ring-demo.loadbalancer.server.port=80
+
+networks:
+  proxy:
+    external: true

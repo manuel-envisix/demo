@@ -1,0 +1,48 @@
+name: Deploy ring-demo
+
+on:
+  push:
+    branches:
+      - cursor/ring-buehne-da52
+  workflow_dispatch:
+
+concurrency:
+  group: ring-demo-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Stage site bundle
+        run: |
+          set -euo pipefail
+          rm -rf bundle
+          mkdir -p bundle/site
+          cp index.html regie.html gebaut.html state.json icon.svg bundle/site/
+          cp -r assets templates bundle/site/
+          cp deployment/docker-compose.yml deployment/nginx.conf bundle/
+
+      - name: Upload to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: bundle/docker-compose.yml,bundle/nginx.conf,bundle/site
+          target: ~/hosting/ring-demo
+          strip_components: 1
+
+      - name: Restart stack
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -euo pipefail
+            cd ~/hosting/ring-demo
+            docker compose -p ring-demo up -d --remove-orphans
