@@ -40,12 +40,23 @@ export function TrackInfrastructure({ protectedTrack, highlightPads, explode }) 
     () =>
       new THREE.MeshStandardMaterial({
         color: '#f39200',
-        emissive: highlightPads ? '#ffaa33' : '#c07000',
-        emissiveIntensity: highlightPads ? 0.85 : 0.45,
-        roughness: 0.5,
+        emissive: highlightPads ? '#ffaa33' : '#d47f00',
+        emissiveIntensity: highlightPads ? 0.55 : 0.28,
+        roughness: 0.45,
       }),
     [highlightPads]
   );
+
+  const ballastMat = useMemo(() => {
+    const cutaway = highlightPads || explode;
+    return new THREE.MeshStandardMaterial({
+      color: '#6b5a48',
+      roughness: 0.95,
+      transparent: cutaway,
+      opacity: cutaway ? 0.42 : 0.88,
+      depthWrite: !cutaway,
+    });
+  }, [highlightPads, explode]);
 
   const count = frames.length;
   const ex = explode ? 1 : 0;
@@ -86,9 +97,7 @@ export function TrackInfrastructure({ protectedTrack, highlightPads, explode }) 
       <instancedMesh ref={railRRef} args={[railGeo, undefined, count]} castShadow>
         <meshStandardMaterial color="#c5cdd6" metalness={0.78} roughness={0.22} />
       </instancedMesh>
-      <instancedMesh ref={ballastRef} args={[ballastGeo, undefined, count]} receiveShadow>
-        <meshStandardMaterial color="#322a22" roughness={1} />
-      </instancedMesh>
+      <instancedMesh ref={ballastRef} args={[ballastGeo, ballastMat, count]} receiveShadow />
     </group>
   );
 }
