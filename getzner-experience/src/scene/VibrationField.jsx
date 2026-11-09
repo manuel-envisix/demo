@@ -5,7 +5,8 @@ import * as THREE from 'three';
 const RING_COUNT = 14;
 
 export function VibrationField({ protectedTrack, speed, getTrainPosition }) {
-  const group = useRef();
+  const anchor = useRef();
+  const ringsGroup = useRef();
   const rings = useRef(
     Array.from({ length: RING_COUNT }, () => ({
       age: Math.random(),
@@ -28,19 +29,21 @@ export function VibrationField({ protectedTrack, speed, getTrainPosition }) {
   );
 
   useFrame((_, delta) => {
-    if (!group.current) return;
+    if (!anchor.current || !ringsGroup.current) return;
     const train = getTrainPosition();
-    group.current.position.set(train.x, train.y - 0.35, train.z);
+    anchor.current.position.set(train.x, train.y - 0.35, train.z);
 
     const decay = protectedTrack ? 2.8 : 0.65;
     const spread = protectedTrack ? 5.5 : 9.5;
 
-    group.current.children.forEach((mesh, i) => {
+    ringsGroup.current.children.forEach((mesh, i) => {
       const r = rings.current[i];
+      if (!r) return;
+
       r.age += delta * (0.55 + speed * 0.9);
       if (r.age > 1) r.age = 0;
 
-      const radius = r.age * spread;
+      const radius = Math.max(r.age * spread, 0.001);
       const fade = Math.pow(1 - r.age, decay);
       mesh.scale.set(radius, radius, 1);
       const mat = ringMaterials[i];
@@ -50,12 +53,14 @@ export function VibrationField({ protectedTrack, speed, getTrainPosition }) {
   });
 
   return (
-    <group ref={group}>
-      {rings.current.map((_, i) => (
-        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} material={ringMaterials[i]}>
-          <ringGeometry args={[0.92, 1, 48]} />
-        </mesh>
-      ))}
+    <group ref={anchor}>
+      <group ref={ringsGroup}>
+        {rings.current.map((_, i) => (
+          <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} material={ringMaterials[i]}>
+            <ringGeometry args={[0.92, 1, 48]} />
+          </mesh>
+        ))}
+      </group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
         <circleGeometry args={[1.2, 32]} />
         <meshBasicMaterial
