@@ -2,7 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Gleislagerung — VWF Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gleislagerung — Getzner Demo</title>
 <style>
 :root {
   --ink: #14120e;
@@ -88,6 +89,7 @@ canvas#scene {
   gap: 2rem;
   margin-top: 1vh;
   font-size: clamp(0.85rem, 1.4vw, 1.1rem);
+  flex-wrap: wrap;
 }
 .legend span { display: flex; align-items: center; gap: 0.5rem; }
 .dot {
@@ -129,7 +131,7 @@ svg#house {
 </style>
 </head>
 <body>
-<h1>Gleislagerung — Vergleichsansicht</h1>
+<h1>Getzner Demo — Gleislagerung</h1>
 <p class="sub">2 × 1&nbsp;km Strecke · Abschnitt 1 ohne · Abschnitt 2 mit Gleislagerung (illustrativ)</p>
 <div class="controls">
   <label for="speed">Geschwindigkeit</label>
@@ -155,7 +157,6 @@ svg#house {
         <rect x="75" y="130" width="30" height="60" fill="#1a1814" stroke="#b7b0a4"/>
         <rect x="120" y="125" width="28" height="28" fill="#1a1814" stroke="#b7b0a4"/>
         <rect x="52" y="125" width="28" height="28" fill="#1a1814" stroke="#b7b0a4"/>
-        <line x1="100" y1="35" x2="100" y2="100" stroke="#f39500" stroke-width="1" opacity="0.3"/>
       </g>
     </svg>
     <p class="house-state wobble" id="houseState">Wackelt — ungelagerter Abschnitt</p>
@@ -197,8 +198,7 @@ svg#house {
   resize();
 
   function sectionAtX(x) {
-    const km = x / KM_PX;
-    return km < 1 ? "ungelagert" : "gelagert";
+    return x / KM_PX < 1 ? "ungelagert" : "gelagert";
   }
 
   function drawTrack(w, h) {
@@ -207,6 +207,9 @@ svg#house {
     const scale = Math.min(1, (w - 80) / totalW);
     const ox = 40;
     const oy = y;
+    const sec = sectionAtX(trainX);
+    const ungelagert = sec === "ungelagert";
+    const amp = ungelagert ? Math.min(18, 4 + kmh() * 0.08) : 0.5;
 
     ctx.save();
     ctx.translate(ox, oy);
@@ -219,8 +222,6 @@ svg#house {
 
     ctx.strokeStyle = "#b7b0a4";
     ctx.lineWidth = 3;
-    const ungelagert = sectionAtX(trainX) === "ungelagert";
-    const amp = ungelagert ? Math.min(18, 4 + kmh() * 0.08) : 0.5;
     ctx.beginPath();
     for (let x = 0; x <= totalW; x += 4) {
       const localKm = x / KM_PX;
@@ -249,12 +250,11 @@ svg#house {
     ctx.fillText("0 km", 8, -36);
     ctx.fillText("1 km", KM_PX + 8, -36);
     ctx.fillText("2 km", totalW - 48, -36);
-
     ctx.font = "600 20px system-ui, sans-serif";
     ctx.fillStyle = "#e88a6a";
-    ctx.fillText("ohne Gleislagerung", 120, -58);
+    ctx.fillText("ohne Gleislagerung", 100, -58);
     ctx.fillStyle = "#6bc49a";
-    ctx.fillText("mit Gleislagerung", KM_PX + 100, -58);
+    ctx.fillText("mit Gleislagerung", KM_PX + 90, -58);
 
     const tx = trainX;
     const tkm = tx / KM_PX;
@@ -285,14 +285,12 @@ svg#house {
       ctx.stroke();
     }
     ctx.restore();
-
     ctx.restore();
-    return { scale, ox, oy, trainDy, amp };
   }
 
-  function updateHouse(sec, section) {
+  function updateHouse(section) {
     const v = kmh();
-  const shake = section === "ungelagert";
+    const shake = section === "ungelagert";
     let dx = 0, dy = 0, rot = 0;
     if (shake) {
       const s = Math.min(1, v / 120);
@@ -321,14 +319,13 @@ svg#house {
     const w = wrap.clientWidth;
     const h = wrap.clientHeight;
     ctx.clearRect(0, 0, w, h);
-
     ctx.fillStyle = "#1e1c18";
     ctx.fillRect(0, 0, w, h * 0.45);
     ctx.fillStyle = "#252320";
     ctx.fillRect(0, h * 0.45, w, h * 0.55);
 
     drawTrack(w, h);
-    updateHouse(dt, sectionAtX(trainX));
+    updateHouse(sectionAtX(trainX));
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

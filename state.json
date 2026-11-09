@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-11-09T00:00:00.000Z",
-  "mode": "idle",
-  "armedAt": null,
+  "updatedAt": "2026-11-09T21:42:09.045Z",
+  "mode": "live",
+  "armedAt": "2026-11-09T21:41:54.801Z",
   "replay": 0,
-  "receivedAt": "",
-  "page": false,
-  "block": ""
+  "receivedAt": "2026-11-09T21:42:09.045Z",
+  "page": true,
+  "block": "„In der Getzner Demo bauen wir eine Seite, auf der ein Zug einen Kilometer ohne und einen Kilometer mit Gleislagerung fährt, mit Geschwindigkeitsregler und einem Haus daneben, das ohne Lagerung wackelt und mit Lagerung ruhig bleibt.“"
 }
