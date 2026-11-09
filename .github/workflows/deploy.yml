@@ -2,8 +2,6 @@ name: Deploy ring-demo
 
 on:
   push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
