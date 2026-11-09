@@ -72,28 +72,37 @@ def normalize(html):
     )
 
 
-def write_demo(experience: str):
+def write_demo_state(*, live_demo: bool, experience: str):
     payload = {
+        "live-demo": live_demo,
         "experience": experience,
         "updatedAt": now(),
-        "note": "live | start | working",
+        "note": "live-demo=false → Ring-Standard · live-demo=true + live → 3D-Erlebnis",
     }
     temporary = Path(str(DEMO_STATE) + ".tmp")
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(DEMO_STATE)
-    print(f"demo-state: {experience}")
+    print(f"demo-state: live-demo={live_demo} experience={experience}")
+
+
+def live_demo_off():
+    write_demo_state(live_demo=False, experience="start")
+
+
+def live_demo_on():
+    write_demo_state(live_demo=True, experience="live")
 
 
 def demo_start():
-    write_demo("start")
+    live_demo_off()
 
 
 def demo_working():
-    write_demo("working")
+    write_demo_state(live_demo=True, experience="working")
 
 
 def demo_live():
-    write_demo("live")
+    live_demo_on()
 
 
 def bereit():
@@ -188,6 +197,12 @@ def main():
         return
     if "--demo-live" in args:
         demo_live()
+        return
+    if "--live-demo-off" in args:
+        live_demo_off()
+        return
+    if "--live-demo-on" in args:
+        live_demo_on()
         return
     files = [arg for arg in args if not arg.startswith("--")]
     if files:

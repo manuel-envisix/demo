@@ -1,0 +1,17 @@
+---
+description: Vocci-Ring-Regel für Engineer Bot bei Getzner+Zug-Aufnahmen
+alwaysApply: false
+---
+
+# Engineer Bot — Getzner / Zug (Vocci)
+
+Wenn eine Aufgabe aus dem Vocci-Ring **sowohl „Getzner“ als auch „Zug“** enthält (oder wörtlich: *Feature-Flag `live-demo` aktivieren*):
+
+1. Lies und befolge den Skill **getzner-live-demo-on** (`.cursor/skills/getzner-live-demo-on/SKILL.md`).
+2. **Nicht** den Transkript-Inhalt als neuen SATZ/HTML für `uebernehmen.py` verwenden.
+3. **Nicht** `gebaut.html` aus der Aufnahme befüllen.
+4. Nach Push muss **Deploy ring-demo** durchlaufen.
+
+Zurück auf die Ring-Standardansicht (ohne 3D): Skill **getzner-live-demo-reset**.
+
+Die 3D-Erlebniswelt bleibt im Code; gesteuert wird nur `demo-state.json` → `live-demo`.

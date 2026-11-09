@@ -14,15 +14,15 @@
 </head>
 <body>
   <h1>Getzner 3D — Demo-Modus (Admin)</h1>
-  <p>Statisches Hosting: Status liegt in <code>demo-state.json</code>.</p>
+  <p>Feature-Flag <code>live-demo</code> in <code>demo-state.json</code> (mit <code>experience</code>).</p>
   <ul>
-    <li><code>live</code> — 3D-Erlebniswelt (Standard für Management)</li>
-    <li><code>start</code> — Ring-Startseite „Eine Aufgabe. Eine Seite.“</li>
-    <li><code>working</code> — echter Agent-/Pipeline-Status</li>
+    <li><code>live-demo: false</code> — Ring-Standard „Eine Aufgabe. Eine Seite.“</li>
+    <li><code>live-demo: true</code> + <code>experience: live</code> — 3D-Erlebniswelt</li>
+    <li><code>live-demo: true</code> + <code>experience: working</code> — Agent arbeitet</li>
   </ul>
-  <p>Lokal / auf dem Server im Repo-Ordner:</p>
-  <pre>python3 uebernehmen.py --demo-live
-python3 uebernehmen.py --demo-start
+  <p>Lokal / im Repo:</p>
+  <pre>python3 uebernehmen.py --live-demo-on
+python3 uebernehmen.py --live-demo-off
 python3 uebernehmen.py --demo-working</pre>
   <p>Remote ohne SSH: GitHub → Actions → <strong>Demo experience mode</strong> → Workflow ausführen.</p>
   <p><a href="/">Zur Startseite</a> · <a href="/buehne/index.html">Ring-Bühne</a></p>
