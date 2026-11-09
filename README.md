@@ -11,6 +11,8 @@ Der Ordner ist die ganze App. Kein Build, kein Node-Prozess, keine Datenbank. Ei
 
 Die Leinwand und `gebaut.html` müssen über http laufen, nicht als lokale Datei.
 
+Live: https://ring-demo.envisix.at – jeder Push auf `cursor/ring-buehne-da52` deployt automatisch (~30–60 s).
+
 ## Live
 
 Composer schreibt den Block. Im Ordner der Seite:
