@@ -39,7 +39,8 @@ jobs:
           mkdir -p bundle/site
           cp -r getzner-experience/dist/* bundle/site/
           mkdir -p bundle/site/buehne
-          cp index.html regie.html gebaut.html state.json icon.svg bundle/site/buehne/
+          cp index.html regie.html gebaut.html state.json demo-state.json icon.svg admin-demo.html bundle/site/buehne/
+          cp admin-demo.html bundle/site/admin.html
           cp -r assets templates bundle/site/buehne/
           cp deployment/docker-compose.yml deployment/nginx.conf bundle/
 

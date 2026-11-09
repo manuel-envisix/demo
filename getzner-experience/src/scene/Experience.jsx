@@ -1,16 +1,18 @@
 import { Canvas } from '@react-three/fiber';
+import { SimulationContext } from '../context/SimulationContext.jsx';
 import { AlpineWorld } from './AlpineWorld.jsx';
 
-export function Experience({ protectedTrack, speed }) {
+export function Experience({ simulation }) {
   return (
-    <Canvas
-      shadows
-      camera={{ position: [-18, 14, 22], fov: 48, near: 0.1, far: 200 }}
-      gl={{ antialias: true, toneMappingExposure: 1.05 }}
-    >
-      <color attach="background" args={['#0a1018']} />
-      <fog attach="fog" args={['#0a1018', 35, 95]} />
-      <AlpineWorld protectedTrack={protectedTrack} speed={speed} />
-    </Canvas>
+    <SimulationContext.Provider value={simulation}>
+      <Canvas
+        shadows
+        camera={{ position: [-20, 12, 24], fov: 42, near: 0.1, far: 220 }}
+        gl={{ antialias: true, powerPreference: 'high-performance' }}
+        dpr={[1, 1.75]}
+      >
+        <AlpineWorld />
+      </Canvas>
+    </SimulationContext.Provider>
   );
 }

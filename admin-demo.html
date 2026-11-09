@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Admin · Getzner Demo-Modus</title>
+<style>
+  body { margin: 2rem; font-family: system-ui, sans-serif; background: #0a0c10; color: #eef1f6; max-width: 40rem; }
+  h1 { font-size: 1.25rem; }
+  code { background: #1a2030; padding: 0.15rem 0.35rem; border-radius: 4px; }
+  a { color: #f39200; }
+</style>
+</head>
+<body>
+  <h1>Getzner 3D — Demo-Modus (Admin)</h1>
+  <p>Statisches Hosting: Status liegt in <code>demo-state.json</code>.</p>
+  <ul>
+    <li><code>live</code> — 3D-Erlebniswelt (Standard für Management)</li>
+    <li><code>start</code> — Ring-Startseite „Eine Aufgabe. Eine Seite.“</li>
+    <li><code>working</code> — echter Agent-/Pipeline-Status</li>
+  </ul>
+  <p>Lokal / auf dem Server im Repo-Ordner:</p>
+  <pre>python3 uebernehmen.py --demo-live
+python3 uebernehmen.py --demo-start
+python3 uebernehmen.py --demo-working</pre>
+  <p>Remote ohne SSH: GitHub → Actions → <strong>Demo experience mode</strong> → Workflow ausführen.</p>
+  <p><a href="/">Zur Startseite</a> · <a href="/buehne/index.html">Ring-Bühne</a></p>
+</body>
+</html>

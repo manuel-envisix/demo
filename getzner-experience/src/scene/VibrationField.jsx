@@ -4,7 +4,13 @@ import * as THREE from 'three';
 
 const RING_COUNT = 14;
 
-export function VibrationField({ protectedTrack, speed, getTrainPosition }) {
+export function VibrationField({
+  protectedTrack,
+  speed,
+  getTrainPosition,
+  getTrainU,
+  intensity = 1,
+}) {
   const anchor = useRef();
   const ringsGroup = useRef();
   const rings = useRef(
@@ -33,8 +39,10 @@ export function VibrationField({ protectedTrack, speed, getTrainPosition }) {
     const train = getTrainPosition();
     anchor.current.position.set(train.x, train.y - 0.35, train.z);
 
-    const decay = protectedTrack ? 2.8 : 0.65;
-    const spread = protectedTrack ? 5.5 : 9.5;
+    const u = getTrainU?.() ?? 0;
+    const localOn = protectedTrack && u >= 60;
+    const decay = localOn ? 2.8 : 0.65;
+    const spread = (localOn ? 5.5 : 9.5) * intensity;
 
     ringsGroup.current.children.forEach((mesh, i) => {
       const r = rings.current[i];
@@ -47,8 +55,8 @@ export function VibrationField({ protectedTrack, speed, getTrainPosition }) {
       const fade = Math.pow(1 - r.age, decay);
       mesh.scale.set(radius, radius, 1);
       const mat = ringMaterials[i];
-      mat.opacity = fade * (protectedTrack ? 0.32 : 0.48);
-      mat.color.set(protectedTrack ? '#00c96e' : '#ff6b4a');
+      mat.opacity = fade * (localOn ? 0.32 : 0.52);
+      mat.color.set(localOn ? '#00e07a' : '#f39200');
     });
   });
 
@@ -64,7 +72,7 @@ export function VibrationField({ protectedTrack, speed, getTrainPosition }) {
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
         <circleGeometry args={[1.2, 32]} />
         <meshBasicMaterial
-          color={protectedTrack ? '#00a651' : '#ff5533'}
+          color={protectedTrack ? '#00e07a' : '#f39200'}
           transparent
           opacity={0.5}
           depthWrite={false}

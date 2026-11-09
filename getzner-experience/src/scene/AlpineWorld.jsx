@@ -1,177 +1,147 @@
-import { useRef, useMemo } from 'react';
+import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { OrbitControls, Sky, Line, Html } from '@react-three/drei';
+import { Sky, Stars } from '@react-three/drei';
 import * as THREE from 'three';
-import { Train } from './Train.jsx';
+import { trackFrame, TRACK_LEN, segmentProtected } from '../track.js';
+import { useSimulation } from '../context/SimulationContext.jsx';
+import { PremiumTrain } from './PremiumTrain.jsx';
 import { VibrationField } from './VibrationField.jsx';
 import { Chalet } from './Chalet.jsx';
-import { MetaLabel } from './MetaLabel.jsx';
+import { TrackInfrastructure } from './TrackInfrastructure.jsx';
+import { Forest } from './Forest.jsx';
+import { CameraDirector } from './CameraDirector.jsx';
 
-const TRACK_LEN = 120;
-const HOUSE_OFFSETS = [-32, -22, -14, 14, 22, 32, 42];
-
-function trackPoint(t) {
-  const x = Math.sin(t * 0.08) * 6;
-  const z = t - TRACK_LEN / 2;
-  const y = Math.sin(t * 0.15) * 0.4 + Math.cos(t * 0.05) * 0.3;
-  return new THREE.Vector3(x, y, z);
-}
+const HOUSE_SLOTS = [
+  { t: 28, side: -18 },
+  { t: 38, side: -24 },
+  { t: 48, side: -16 },
+  { t: 62, side: 18 },
+  { t: 72, side: 26 },
+  { t: 82, side: 16 },
+];
 
 function AlpineTerrain() {
-  const geom = useMemo(() => {
-    const g = new THREE.PlaneGeometry(140, 140, 80, 80);
-    const pos = g.attributes.position;
-    for (let i = 0; i < pos.count; i++) {
-      const x = pos.getX(i);
-      const y = pos.getY(i);
-      const h =
-        Math.sin(x * 0.12) * 1.2 +
-        Math.cos(y * 0.09) * 1.4 +
-        Math.sin((x + y) * 0.06) * 2 +
-        Math.abs(x) * 0.04;
-      pos.setZ(i, h);
-    }
-    g.computeVertexNormals();
-    return g;
-  }, []);
-
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.8, 0]} geometry={geom} receiveShadow>
-      <meshStandardMaterial color="#1e3a2f" roughness={0.92} metalness={0.05} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.85, 0]} receiveShadow>
+      <planeGeometry args={[160, 160, 1, 1]} />
+      <meshStandardMaterial color="#121820" roughness={0.98} metalness={0.02} />
     </mesh>
   );
 }
 
-function SnowPeaks() {
-  const peaks = useMemo(
-    () =>
-      [
-        [-45, 18, -35],
-        [50, 22, -40],
-        [-55, 16, 25],
-        [48, 20, 30],
-      ].map((p, i) => ({ pos: p, scale: 8 + i * 2 })),
-    []
-  );
-  return peaks.map((pk, i) => (
-    <mesh key={i} position={pk.pos} scale={[pk.scale, pk.scale * 1.4, pk.scale]} castShadow>
-      <coneGeometry args={[1, 1, 4]} />
-      <meshStandardMaterial color="#dce8f0" roughness={0.85} />
+function Mountains() {
+  const peaks = [
+    [-48, 20, -42, 11],
+    [52, 24, -38, 13],
+    [-58, 18, 32, 10],
+    [44, 21, 36, 12],
+    [-20, 16, -55, 9],
+  ];
+  return peaks.map(([x, y, z, s], i) => (
+    <mesh key={i} position={[x, y, z]} scale={[s, s * 1.35, s]} castShadow>
+      <coneGeometry args={[1, 1, 5]} />
+      <meshStandardMaterial color="#3d4d5c" roughness={0.88} />
     </mesh>
   ));
 }
 
-function RailwayTrack({ protectedTrack }) {
-  const points = useMemo(() => {
-    const pts = [];
-    for (let t = 0; t <= TRACK_LEN; t += 1.5) pts.push(trackPoint(t));
-    return pts;
-  }, []);
-
-  const railMat = protectedTrack ? '#3d7a52' : '#6a5040';
-  const padColor = protectedTrack ? '#00a651' : '#55443a';
-
-  return (
-    <group position={[0, 0.05, 0]}>
-      {points.map((p, i) => {
-        if (i >= points.length - 1) return null;
-        const p2 = points[i + 1];
-        const mid = p.clone().add(p2).multiplyScalar(0.5);
-        const dir = p2.clone().sub(p).normalize();
-        const quat = new THREE.Quaternion().setFromUnitVectors(
-          new THREE.Vector3(0, 0, 1),
-          dir
-        );
-        return (
-          <group key={i} position={mid} quaternion={quat}>
-            <mesh position={[-0.72, 0.08, 0]} castShadow>
-              <boxGeometry args={[0.12, 0.1, 1.6]} />
-              <meshStandardMaterial color={railMat} metalness={0.65} roughness={0.35} />
-            </mesh>
-            <mesh position={[0.72, 0.08, 0]} castShadow>
-              <boxGeometry args={[0.12, 0.1, 1.6]} />
-              <meshStandardMaterial color={railMat} metalness={0.65} roughness={0.35} />
-            </mesh>
-            {protectedTrack && i % 3 === 0 && (
-              <mesh position={[0, -0.12, 0]}>
-                <boxGeometry args={[1.5, 0.06, 1.4]} />
-                <meshStandardMaterial
-                  color={padColor}
-                  emissive={padColor}
-                  emissiveIntensity={0.25}
-                />
-              </mesh>
-            )}
-          </group>
-        );
-      })}
-      <Line points={points} color={protectedTrack ? '#00c96e' : '#ff6b4a'} lineWidth={1} />
-    </group>
-  );
-}
-
-export function AlpineWorld({ protectedTrack, speed }) {
+export function AlpineWorld() {
+  const {
+    speed,
+    playing,
+    protectedTrack,
+    cameraMode,
+    viewMode,
+    productHighlight,
+    trainURef,
+    timeRef,
+    onTrainProgress,
+  } = useSimulation();
   const trainRef = useRef();
-  const timeRef = useRef(0);
 
   useFrame((_, delta) => {
-    timeRef.current += delta * (0.35 + speed * 1.8);
-    const t = (timeRef.current % TRACK_LEN) + 5;
-    const pos = trackPoint(t);
-    const posAhead = trackPoint(t + 2);
+    if (!trainURef || !timeRef) return;
+    if (playing) {
+      timeRef.current += delta * (0.28 + speed * 1.6);
+      trainURef.current = 8 + timeRef.current;
+      if (trainURef.current > TRACK_LEN - 4) {
+        trainURef.current = 8;
+        timeRef.current = 0;
+      }
+    }
+    onTrainProgress?.(trainURef.current);
+    const frame = trackFrame(trainURef.current);
     if (trainRef.current) {
-      trainRef.current.position.copy(pos.clone().add(new THREE.Vector3(0, 0.45, 0)));
-      trainRef.current.lookAt(posAhead.x, posAhead.y + 0.45, posAhead.z);
+      const look = trackFrame(trainURef.current + 1.2);
+      trainRef.current.position.copy(frame.railTop);
+      trainRef.current.position.y += 0.2;
+      trainRef.current.userData.frame = frame;
+      trainRef.current.userData.u = trainURef.current;
+      const aim = new THREE.Object3D();
+      aim.position.copy(trainRef.current.position);
+      aim.lookAt(look.railTop.x, look.railTop.y + 0.2, look.railTop.z);
+      trainRef.current.quaternion.copy(aim.quaternion);
     }
   });
 
-  const trainPos = () => trainRef.current?.position ?? new THREE.Vector3(0, 0.5, 0);
+  const trainPos = () => trainRef.current?.position ?? new THREE.Vector3();
+  const localProtect = (u) => segmentProtected(u, protectedTrack);
+
+  const xray = viewMode === 'product' || productHighlight;
+  const emissiveVibration = viewMode === 'ground' ? 1.35 : 1;
 
   return (
     <>
-      <ambientLight intensity={0.35} />
+      <color attach="background" args={['#070a10']} />
+      <fog attach="fog" args={['#070a10', 28, 110]} />
+      <ambientLight intensity={0.22} />
       <directionalLight
-        position={[25, 40, 15]}
-        intensity={1.4}
+        position={[-30, 45, 20]}
+        intensity={1.1}
+        color="#ffb070"
         castShadow
         shadow-mapSize={[2048, 2048]}
-        shadow-camera-far={120}
-        shadow-camera-left={-40}
-        shadow-camera-right={40}
-        shadow-camera-top={40}
-        shadow-camera-bottom={-40}
+        shadow-camera-far={140}
+        shadow-camera-left={-50}
+        shadow-camera-right={50}
+        shadow-camera-top={50}
+        shadow-camera-bottom={-50}
       />
-      <hemisphereLight args={['#8ec8ff', '#1a3028', 0.45]} />
+      <directionalLight position={[40, 20, -30]} intensity={0.35} color="#6a8cff" />
+      <hemisphereLight args={['#3a4a6a', '#0a1018', 0.55]} />
       <Sky
         distance={450000}
-        sunPosition={[100, 30, 100]}
-        inclination={0.52}
-        azimuth={0.22}
-        mieCoefficient={0.008}
+        sunPosition={[-1, 0.15, -0.8]}
+        inclination={0.49}
+        azimuth={0.25}
+        mieCoefficient={0.01}
+        turbidity={8}
       />
-      <OrbitControls
-        enablePan={false}
-        minDistance={12}
-        maxDistance={55}
-        maxPolarAngle={Math.PI / 2.1}
-        target={[0, 2, 0]}
-      />
+      <Stars radius={120} depth={50} count={1200} factor={3} saturation={0.2} fade speed={0.3} />
+
+      <CameraDirector mode={cameraMode} target={trainRef} playing={playing} />
 
       <AlpineTerrain />
-      <SnowPeaks />
-      <RailwayTrack protectedTrack={protectedTrack} />
+      <Mountains />
+      <Forest />
 
-      {HOUSE_OFFSETS.map((side, i) => {
-        const t = 35 + i * 11;
-        const base = trackPoint(t);
-        const sign = side > 0 ? 1 : -1;
-        const pos = new THREE.Vector3(base.x + sign * Math.abs(side) * 0.55, base.y, base.z);
+      <TrackInfrastructure
+        protectedTrack={protectedTrack}
+        trainU={trainRef.current?.userData?.u ?? 0}
+      />
+
+      {HOUSE_SLOTS.map((slot, i) => {
+        const f = trackFrame(slot.t);
+        const sign = slot.side > 0 ? 1 : -1;
+        const pos = f.railTop
+          .clone()
+          .add(f.right.clone().multiplyScalar(sign * Math.abs(slot.side) * 0.35));
         return (
           <Chalet
             key={i}
             position={pos}
-            rotationY={side > 0 ? -Math.PI / 2 : Math.PI / 2}
-            protectedTrack={protectedTrack}
+            rotationY={slot.side > 0 ? -Math.PI / 2 : Math.PI / 2}
+            protectedTrack={localProtect(slot.t)}
             trainRef={trainRef}
             index={i}
           />
@@ -179,18 +149,16 @@ export function AlpineWorld({ protectedTrack, speed }) {
       })}
 
       <group ref={trainRef}>
-        <Train />
+        <PremiumTrain xray={xray} />
       </group>
 
       <VibrationField
         protectedTrack={protectedTrack}
         speed={speed}
         getTrainPosition={trainPos}
+        getTrainU={() => trainRef.current?.userData?.u ?? 0}
+        intensity={emissiveVibration}
       />
-
-      <Html position={[0, 6, -48]} center distanceFactor={12} style={{ pointerEvents: 'none' }}>
-        <MetaLabel protectedTrack={protectedTrack} />
-      </Html>
     </>
   );
 }

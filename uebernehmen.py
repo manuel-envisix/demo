@@ -9,6 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 STATE = ROOT / "state.json"
+DEMO_STATE = ROOT / "demo-state.json"
 PAGE = ROOT / "gebaut.html"
 WAITING = ROOT / "assets" / "warten.html"
 MAX_HTML = 180_000
@@ -69,6 +70,30 @@ def normalize(html):
         + html
         + "</body></html>"
     )
+
+
+def write_demo(experience: str):
+    payload = {
+        "experience": experience,
+        "updatedAt": now(),
+        "note": "live | start | working",
+    }
+    temporary = Path(str(DEMO_STATE) + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(DEMO_STATE)
+    print(f"demo-state: {experience}")
+
+
+def demo_start():
+    write_demo("start")
+
+
+def demo_working():
+    write_demo("working")
+
+
+def demo_live():
+    write_demo("live")
 
 
 def bereit():
@@ -154,6 +179,15 @@ def main():
         return
     if "--nochmal" in args:
         nochmal()
+        return
+    if "--demo-start" in args:
+        demo_start()
+        return
+    if "--demo-working" in args:
+        demo_working()
+        return
+    if "--demo-live" in args:
+        demo_live()
         return
     files = [arg for arg in args if not arg.startswith("--")]
     if files:

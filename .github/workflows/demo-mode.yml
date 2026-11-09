@@ -1,0 +1,44 @@
+name: Demo experience mode
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Sichtbarer Demo-Modus auf ring-demo.envisix.at
+        required: true
+        type: choice
+        options:
+          - live
+          - start
+          - working
+
+permissions:
+  contents: write
+
+jobs:
+  set-mode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set demo-state.json
+        run: |
+          set -euo pipefail
+          ts="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          cat > demo-state.json <<EOF
+          {
+            "experience": "${{ inputs.mode }}",
+            "updatedAt": "${ts}",
+            "note": "gesetzt via GitHub Workflow (Admin)"
+          }
+          EOF
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add demo-state.json
+          git diff --staged --quiet && exit 0
+          git commit -m "Admin: Demo-Modus ${{ inputs.mode }}"
+          git push
