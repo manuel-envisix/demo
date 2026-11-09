@@ -29,7 +29,8 @@ export default function App() {
   const [protectedTrack, setProtectedTrack] = useState(true);
   const [speed, setSpeed] = useState(0.55);
   const [playing, setPlaying] = useState(true);
-  const [productId, setProductId] = useState('sylomer');
+  const [productId, setProductId] = useState('sleeper-boot');
+  const [explodeTrack, setExplodeTrack] = useState(false);
   const [cameraMode, setCameraMode] = useState('follow');
   const [viewMode, setViewMode] = useState('overview');
   const [trainKm, setTrainKm] = useState(0.15);
@@ -61,6 +62,28 @@ export default function App() {
     });
   }, []);
 
+  const highlightPads = protectedTrack && productId === 'sleeper-boot';
+  const focusTrack = productId === 'sleeper-boot' && viewMode === 'product';
+
+  const selectProduct = useCallback(
+    (id) => {
+      setProductId(id);
+      const p = PRODUCTS.find((x) => x.id === id);
+      if (p?.sceneFocus) {
+        setViewMode('product');
+        setCameraMode('product');
+        setExplodeTrack(true);
+      } else {
+        setExplodeTrack(false);
+        if (viewMode === 'product') {
+          setViewMode('overview');
+          setCameraMode('follow');
+        }
+      }
+    },
+    [viewMode]
+  );
+
   const simulation = useMemo(
     () => ({
       protectedTrack,
@@ -69,6 +92,9 @@ export default function App() {
       cameraMode,
       viewMode,
       productHighlight: productId,
+      highlightPads,
+      explodeTrack,
+      focusTrack,
       trainURef,
       timeRef,
       seekKm,
@@ -81,6 +107,9 @@ export default function App() {
       cameraMode,
       viewMode,
       productId,
+      highlightPads,
+      explodeTrack,
+      focusTrack,
       seekKm,
       onTrainProgress,
     ]
@@ -88,7 +117,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <div className="canvas-layer">
+      <div className={`canvas-layer${focusTrack ? ' canvas-dim' : ''}`}>
         <Experience simulation={simulation} />
       </div>
 
@@ -153,7 +182,7 @@ export default function App() {
                 <button
                   type="button"
                   className={p.id === productId ? 'selected' : ''}
-                  onClick={() => setProductId(p.id)}
+                  onClick={() => selectProduct(p.id)}
                 >
                   <img src={p.thumb} alt="" />
                   <span>{p.name}</span>
@@ -166,8 +195,16 @@ export default function App() {
           </div>
           <p className="placement">{product.placement}</p>
           <p className="product-copy">{product.blurb}</p>
-          {product.illustrativeOnly && (
-            <p className="illus-note">Nur Produktfamilie — nicht als Gleisdetail modelliert.</p>
+          {product.primary && protectedTrack && (
+            <p className="placement">Aktiv in 3D: orange Schwellensohlen unter allen Schwellen</p>
+          )}
+          {product.alternative && (
+            <p className="illus-note">Alternative Lösung — nicht gleichzeitig in der 3D-Einbausituation.</p>
+          )}
+          {productId === 'sleeper-boot' && (
+            <button type="button" className="explode-btn" onClick={() => setExplodeTrack((v) => !v)}>
+              {explodeTrack ? 'Explosion aus' : 'Explosionsansicht'}
+            </button>
           )}
           <a className="product-link" href={product.url} target="_blank" rel="noopener noreferrer">
             Offizielle Produktseite →
@@ -196,11 +233,7 @@ export default function App() {
             />
             <strong>{kmh(speed)} km/h*</strong>
           </div>
-          <TrackTimeline
-            trainKm={trainKm}
-            onSeek={seekKm}
-            protectedTrack={protectedTrack}
-          />
+          <TrackTimeline trainKm={trainKm} onSeek={seekKm} />
           <div className="camera-block">
             <span>Kameramodi</span>
             <div className="chip-row">

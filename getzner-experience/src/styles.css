@@ -42,6 +42,15 @@ body,
   z-index: 0;
 }
 
+.canvas-dim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.42);
+  pointer-events: none;
+  z-index: 1;
+}
+
 .glass {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -365,14 +374,21 @@ input[type='range'] {
   margin: 0.25rem 0;
 }
 
-.track-zone--raw {
-  flex: 1;
-  background: linear-gradient(90deg, #7a3a18, var(--orange));
+.track-rail--neutral {
+  background: rgba(255, 255, 255, 0.12);
+  height: 8px;
 }
 
-.track-zone--iso {
-  flex: 1;
-  background: linear-gradient(90deg, #0a5a38, var(--green));
+.explode-btn {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.45rem;
+  border-radius: 4px;
+  border: 1px solid var(--orange);
+  background: rgba(243, 146, 0, 0.12);
+  color: var(--orange);
+  font-size: 0.7rem;
+  cursor: pointer;
 }
 
 .track-marker {

@@ -2,7 +2,8 @@ import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Sky, Stars } from '@react-three/drei';
 import * as THREE from 'three';
-import { trackFrame, TRACK_LEN, segmentProtected } from '../track.js';
+import { trackFrame, trackOrientation, TRACK_LEN } from '../track.js';
+import { TrackExplosionAnchor } from './TrackExplosionAnchor.jsx';
 import { useSimulation } from '../context/SimulationContext.jsx';
 import { PremiumTrain } from './PremiumTrain.jsx';
 import { VibrationField } from './VibrationField.jsx';
@@ -53,6 +54,9 @@ export function AlpineWorld() {
     cameraMode,
     viewMode,
     productHighlight,
+    highlightPads,
+    explodeTrack,
+    focusTrack,
     trainURef,
     timeRef,
     onTrainProgress,
@@ -72,29 +76,22 @@ export function AlpineWorld() {
     onTrainProgress?.(trainURef.current);
     const frame = trackFrame(trainURef.current);
     if (trainRef.current) {
-      const look = trackFrame(trainURef.current + 1.2);
       trainRef.current.position.copy(frame.railTop);
-      trainRef.current.position.y += 0.2;
+      trainRef.current.quaternion.copy(trackOrientation(frame));
       trainRef.current.userData.frame = frame;
       trainRef.current.userData.u = trainURef.current;
-      const aim = new THREE.Object3D();
-      aim.position.copy(trainRef.current.position);
-      aim.lookAt(look.railTop.x, look.railTop.y + 0.2, look.railTop.z);
-      trainRef.current.quaternion.copy(aim.quaternion);
     }
   });
 
   const trainPos = () => trainRef.current?.position ?? new THREE.Vector3();
-  const localProtect = (u) => segmentProtected(u, protectedTrack);
-
-  const xray = viewMode === 'product' || productHighlight;
+  const xray = viewMode === 'product' && productHighlight === 'sleeper-boot';
   const emissiveVibration = viewMode === 'ground' ? 1.35 : 1;
 
   return (
     <>
       <color attach="background" args={['#070a10']} />
       <fog attach="fog" args={['#070a10', 28, 110]} />
-      <ambientLight intensity={0.22} />
+      <ambientLight intensity={0.38} />
       <directionalLight
         position={[-30, 45, 20]}
         intensity={1.1}
@@ -127,7 +124,8 @@ export function AlpineWorld() {
 
       <TrackInfrastructure
         protectedTrack={protectedTrack}
-        trainU={trainRef.current?.userData?.u ?? 0}
+        highlightPads={highlightPads}
+        explode={explodeTrack}
       />
 
       {HOUSE_SLOTS.map((slot, i) => {
@@ -141,7 +139,7 @@ export function AlpineWorld() {
             key={i}
             position={pos}
             rotationY={slot.side > 0 ? -Math.PI / 2 : Math.PI / 2}
-            protectedTrack={localProtect(slot.t)}
+            protectedTrack={protectedTrack}
             trainRef={trainRef}
             index={i}
           />
@@ -156,9 +154,10 @@ export function AlpineWorld() {
         protectedTrack={protectedTrack}
         speed={speed}
         getTrainPosition={trainPos}
-        getTrainU={() => trainRef.current?.userData?.u ?? 0}
         intensity={emissiveVibration}
       />
+
+      <TrackExplosionAnchor trainRef={trainRef} visible={focusTrack} explode={explodeTrack} />
     </>
   );
 }

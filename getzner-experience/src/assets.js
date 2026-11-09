@@ -9,22 +9,31 @@ export const GETZNER = {
     'https://www.getzner.com/uploads/media/330x330/08/108-PIktogramm_Bahn_Einlageplatten_fuer_Schwellenschuhe_LVT.webp?v=5-0',
   massSpring:
     'https://www.getzner.com/uploads/media/330x330/02/112-PIktogramm_Bahn_Masse_Feder_System_Streifenfoermig.webp?v=5-0',
-  baseplate:
-    'https://www.getzner.com/uploads/media/1180x/03/48983-L%C3%B6sungen%20f%C3%BCr%20den%20Bahnoberbau_Grafik%20Produkte%20f%C3%BCr%20den%20Bahnoberbau%20EN.png?v=2-0',
-  isotop:
-    'https://www.getzner.com/uploads/media/330x330/08/188-Getzner-Produkte-Industrie-Waggonbodenlagerungen.webp?v=2-0',
 };
 
 export const PRODUCTS = [
+  {
+    id: 'sleeper-boot',
+    name: 'Getzner Schwellensohle',
+    image: GETZNER.insertionPads,
+    thumb: GETZNER.insertionPads,
+    url: 'https://www.getzner.com/en-us/products/rail-products/elastic-insertion-pads-for-sleeper-boots',
+    placement: 'Unter jeder Betonschwelle · Schwellenschuh mit Sylomer®',
+    blurb:
+      'Elastische Schwellensohle im Schwellenschuh: entkoppelt die Schwelle vom Schotter, verlängert den Schwingungspfad und reduziert Körperschall (illustrativ).',
+    primary: true,
+    sceneFocus: true,
+    material: 'Sylomer®',
+  },
   {
     id: 'sylomer',
     name: 'Sylomer®',
     image: GETZNER.sylomerSamples,
     thumb: GETZNER.sylomerSamples,
     url: 'https://www.getzner.com/en/products/sylomer',
-    placement: 'Schienenlager / definierte Federkennlinie im Oberbau',
-    blurb:
-      'Polyurethan-Elastomer für Elastizität im Bahnoberbau — reduziert Körperschall und Verschleiß (illustrative Demo-Werte).',
+    placement: 'Werkstoff der Schwellensohle / definierte Federkennlinien',
+    blurb: 'Bewährtes Polyurethan-Elastomer — in dieser Demo als Material der Schwellensohle dargestellt.',
+    alternative: true,
   },
   {
     id: 'sylodyn',
@@ -32,9 +41,9 @@ export const PRODUCTS = [
     image: GETZNER.sylodynSamples,
     thumb: GETZNER.sylodynSamples,
     url: 'https://www.getzner.com/en/products/sylodyn',
-    placement: 'Hochbelastete Lager, z. B. Baseplate Pads / HGV',
-    blurb:
-      'Höhere dynamische Steifigkeit, geschlossene Zellstruktur — für Hochgeschwindigkeit und Punktlasten.',
+    placement: 'Alternative bei höheren Punktlasten (z. B. Baseplate Pads)',
+    blurb: 'Höhere dynamische Steifigkeit — alternative Lösung, hier nicht gleichzeitig mit Sohle verbaut.',
+    alternative: true,
   },
   {
     id: 'insertion',
@@ -42,8 +51,9 @@ export const PRODUCTS = [
     image: GETZNER.insertionPads,
     thumb: GETZNER.insertionPads,
     url: 'https://www.getzner.com/en-us/products/rail-products/elastic-insertion-pads-for-sleeper-boots',
-    placement: 'Schwellenschuhe · Fertigbetonoberbau',
-    blurb: 'Zusätzliche Masse im Schwingungspfad — typisch in Tunnel- und Slab-Track-Abschnitten.',
+    placement: 'Zusätzliche Elastizität in Schwellenschuhen (Fertigbeton)',
+    blurb: 'Ergänzende Einlagen im Sonneville-LVT-System — alternative Konfiguration.',
+    alternative: true,
   },
   {
     id: 'mass-spring',
@@ -51,18 +61,8 @@ export const PRODUCTS = [
     image: GETZNER.massSpring,
     thumb: GETZNER.massSpring,
     url: 'https://www.getzner.com/media/850/download/Brochure%20Mass-Spring%20Systems%20EN.pdf?v=3',
-    placement: 'Entkopplung der gesamten Überbau-Masse',
-    blurb: 'Maximaler Körperschallschutz mit Sylomer® / Sylodyn® als dauerelastische Lager.',
-  },
-  {
-    id: 'isotop',
-    name: 'Isotop®',
-    image: GETZNER.isotop,
-    thumb: GETZNER.isotop,
-    url: 'https://www.getzner.com/en/products/isotop',
-    placement: 'Maschinen- und Systemlager (kein Gleisfeld)',
-    blurb:
-      'Feder-Elemente mit Metall und Polyurethan — hier nur zur Produktfamilie, nicht als verbaute Gleislösung dargestellt.',
-    illustrativeOnly: true,
+    placement: 'Entkoppelte Masse — anderer Anwendungsfall',
+    blurb: 'Systemlösung für höchsten Körperschallschutz, nicht als Einzelsohle modelliert.',
+    alternative: true,
   },
 ];

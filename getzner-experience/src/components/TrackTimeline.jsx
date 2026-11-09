@@ -1,4 +1,4 @@
-export function TrackTimeline({ trainKm, onSeek, protectedTrack }) {
+export function TrackTimeline({ trainKm, onSeek }) {
   return (
     <div className="track-timeline">
       <div className="track-labels">
@@ -6,9 +6,7 @@ export function TrackTimeline({ trainKm, onSeek, protectedTrack }) {
         <span>1 km</span>
         <span>2 km</span>
       </div>
-      <div className="track-rail" aria-hidden="true">
-        <div className="track-zone track-zone--raw" />
-        <div className="track-zone track-zone--iso" />
+      <div className="track-rail track-rail--neutral" aria-hidden="true">
         <div className="track-marker" style={{ left: `${(trainKm / 2) * 100}%` }} />
       </div>
       <input
@@ -20,10 +18,7 @@ export function TrackTimeline({ trainKm, onSeek, protectedTrack }) {
         onChange={(e) => onSeek(Number(e.target.value))}
         aria-label="Streckenfortschritt"
       />
-      <p className="illus-note">
-        Ab 1 km:{' '}
-        {protectedTrack ? 'Getzner-Lagerung aktiv (illustrativ)' : 'ohne Isolation — illustrativ'}
-      </p>
+      <p className="illus-note">Streckenfortschritt — Isolation nur oben rechts umschalten</p>
     </div>
   );
 }

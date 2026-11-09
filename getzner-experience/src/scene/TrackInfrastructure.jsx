@@ -1,70 +1,94 @@
-import { useMemo } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { trackFrame, TRACK_LEN } from '../track.js';
+import { trackFrame, trackOrientation, TRACK_LEN } from '../track.js';
 
-export function TrackInfrastructure({ protectedTrack, trainU }) {
-  const sleepers = useMemo(() => {
-    const items = [];
-    for (let t = 0; t < TRACK_LEN; t += 2.1) {
-      items.push(trackFrame(t));
-    }
-    return items;
+const STEP = 2.0;
+const _matrix = new THREE.Matrix4();
+const _pos = new THREE.Vector3();
+const _quat = new THREE.Quaternion();
+const _scale = new THREE.Vector3(1, 1, 1);
+const _offset = new THREE.Vector3();
+
+function setInstance(mesh, index, frame, ox, oy, oz, explode = 0) {
+  if (!mesh) return;
+  _quat.copy(trackOrientation(frame));
+  _offset.set(ox, oy - explode * Math.abs(oy) * 0.5, oz).applyQuaternion(_quat);
+  _pos.copy(frame.railTop).add(_offset);
+  _matrix.compose(_pos, _quat, _scale);
+  mesh.setMatrixAt(index, _matrix);
+}
+
+export function TrackInfrastructure({ protectedTrack, highlightPads, explode }) {
+  const frames = useMemo(() => {
+    const list = [];
+    for (let t = 0; t < TRACK_LEN; t += STEP) list.push(trackFrame(t));
+    return list;
   }, []);
+
+  const sleeperRef = useRef();
+  const padRef = useRef();
+  const railLRef = useRef();
+  const railRRef = useRef();
+  const ballastRef = useRef();
+
+  const sleeperGeo = useMemo(() => new THREE.BoxGeometry(2.55, 0.18, 0.48), []);
+  const padGeo = useMemo(() => new THREE.BoxGeometry(2.35, 0.07, 0.42), []);
+  const railGeo = useMemo(() => new THREE.BoxGeometry(0.11, 0.1, 2.15), []);
+  const ballastGeo = useMemo(() => new THREE.BoxGeometry(2.9, 0.14, 1.7), []);
+
+  const padMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#f39200',
+        emissive: highlightPads ? '#ffaa33' : '#c07000',
+        emissiveIntensity: highlightPads ? 0.85 : 0.45,
+        roughness: 0.5,
+      }),
+    [highlightPads]
+  );
+
+  const count = frames.length;
+  const ex = explode ? 1 : 0;
+
+  useLayoutEffect(() => {
+    frames.forEach((frame, i) => {
+      setInstance(sleeperRef.current, i, frame, 0, -0.05, 0, ex);
+      if (protectedTrack && padRef.current) {
+        setInstance(padRef.current, i, frame, 0, -0.175, 0, ex * 1.2);
+      }
+      setInstance(railLRef.current, i, frame, -0.72, 0.09, 0, ex * 2);
+      setInstance(railRRef.current, i, frame, 0.72, 0.09, 0, ex * 2);
+      setInstance(ballastRef.current, i, frame, 0, -0.3, 0, ex * 1.5);
+    });
+    sleeperRef.current.instanceMatrix.needsUpdate = true;
+    if (padRef.current) padRef.current.instanceMatrix.needsUpdate = true;
+    railLRef.current.instanceMatrix.needsUpdate = true;
+    railRRef.current.instanceMatrix.needsUpdate = true;
+    ballastRef.current.instanceMatrix.needsUpdate = true;
+  }, [frames, protectedTrack, highlightPads, explode, count, ex]);
 
   return (
     <group>
-      {sleepers.map((f, i) => {
-        const quat = new THREE.Quaternion().setFromUnitVectors(
-          new THREE.Vector3(1, 0, 0),
-          f.right
-        );
-        const localProtected = protectedTrack && f.u >= TRACK_LEN / 2;
-        return (
-          <group key={i} position={f.railTop} quaternion={quat}>
-            <mesh position={[0, -0.06, 0]} castShadow receiveShadow>
-              <boxGeometry args={[2.6, 0.14, 0.42]} />
-              <meshStandardMaterial color="#3a322c" roughness={0.95} />
-            </mesh>
-            <mesh position={[-0.72, 0.06, 0]} castShadow>
-              <boxGeometry args={[0.11, 0.09, 2.4]} />
-              <meshStandardMaterial color="#8a9199" metalness={0.7} roughness={0.28} />
-            </mesh>
-            <mesh position={[0.72, 0.06, 0]} castShadow>
-              <boxGeometry args={[0.11, 0.09, 2.4]} />
-              <meshStandardMaterial color="#8a9199" metalness={0.7} roughness={0.28} />
-            </mesh>
-            <mesh position={[0, -0.14, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[2.8, 1.6]} />
-              <meshStandardMaterial color="#2b2520" roughness={1} />
-            </mesh>
-            {localProtected && (
-              <mesh position={[0, -0.1, 0]}>
-                <boxGeometry args={[1.35, 0.05, 1.2]} />
-                <meshStandardMaterial
-                  color="#f39200"
-                  emissive="#b86400"
-                  emissiveIntensity={0.35}
-                />
-              </mesh>
-            )}
-          </group>
-        );
-      })}
-      <BallastStrip trainU={trainU} />
+      <instancedMesh
+        ref={sleeperRef}
+        args={[sleeperGeo, undefined, count]}
+        castShadow
+        receiveShadow
+      >
+        <meshStandardMaterial color="#a8b2bc" roughness={0.78} metalness={0.1} />
+      </instancedMesh>
+      {protectedTrack && (
+        <instancedMesh ref={padRef} args={[padGeo, padMat, count]} castShadow receiveShadow />
+      )}
+      <instancedMesh ref={railLRef} args={[railGeo, undefined, count]} castShadow>
+        <meshStandardMaterial color="#c5cdd6" metalness={0.78} roughness={0.22} />
+      </instancedMesh>
+      <instancedMesh ref={railRRef} args={[railGeo, undefined, count]} castShadow>
+        <meshStandardMaterial color="#c5cdd6" metalness={0.78} roughness={0.22} />
+      </instancedMesh>
+      <instancedMesh ref={ballastRef} args={[ballastGeo, undefined, count]} receiveShadow>
+        <meshStandardMaterial color="#322a22" roughness={1} />
+      </instancedMesh>
     </group>
-  );
-}
-
-function BallastStrip({ trainU }) {
-  const geo = useMemo(() => new THREE.PlaneGeometry(TRACK_LEN, 3.2, 1, 1), []);
-  return (
-    <mesh
-      geometry={geo}
-      rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, -0.22, 0]}
-      receiveShadow
-    >
-      <meshStandardMaterial color="#1a1714" roughness={0.98} />
-    </mesh>
   );
 }

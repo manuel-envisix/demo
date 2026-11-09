@@ -7,7 +7,7 @@ export function Experience({ simulation }) {
     <SimulationContext.Provider value={simulation}>
       <Canvas
         shadows
-        camera={{ position: [-20, 12, 24], fov: 42, near: 0.1, far: 220 }}
+        camera={{ position: [-28, 16, 32], fov: 40, near: 0.1, far: 220 }}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         dpr={[1, 1.75]}
       >

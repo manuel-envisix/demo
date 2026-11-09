@@ -8,7 +8,6 @@ export function VibrationField({
   protectedTrack,
   speed,
   getTrainPosition,
-  getTrainU,
   intensity = 1,
 }) {
   const anchor = useRef();
@@ -39,10 +38,8 @@ export function VibrationField({
     const train = getTrainPosition();
     anchor.current.position.set(train.x, train.y - 0.35, train.z);
 
-    const u = getTrainU?.() ?? 0;
-    const localOn = protectedTrack && u >= 60;
-    const decay = localOn ? 2.8 : 0.65;
-    const spread = (localOn ? 5.5 : 9.5) * intensity;
+    const decay = protectedTrack ? 2.8 : 0.65;
+    const spread = (protectedTrack ? 5.5 : 9.5) * intensity;
 
     ringsGroup.current.children.forEach((mesh, i) => {
       const r = rings.current[i];
@@ -55,8 +52,8 @@ export function VibrationField({
       const fade = Math.pow(1 - r.age, decay);
       mesh.scale.set(radius, radius, 1);
       const mat = ringMaterials[i];
-      mat.opacity = fade * (localOn ? 0.32 : 0.52);
-      mat.color.set(localOn ? '#00e07a' : '#f39200');
+      mat.opacity = fade * (protectedTrack ? 0.32 : 0.52);
+      mat.color.set(protectedTrack ? '#00e07a' : '#f39200');
     });
   });
 

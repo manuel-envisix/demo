@@ -4,12 +4,12 @@ import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 const MODES = {
-  follow: { dist: 16, height: 6, side: 0 },
-  side: { dist: 22, height: 4, side: 1 },
+  follow: { dist: 24, height: 8, side: 0.15 },
+  side: { dist: 26, height: 5, side: 1 },
   free: null,
-  ground: { dist: 12, height: 1.2, side: 0.6 },
-  product: { dist: 8, height: 2.5, side: 0.3 },
-  inside: { dist: 4.5, height: 2.4, side: 0.15 },
+  ground: { dist: 14, height: 1.4, side: 0.75 },
+  product: { dist: 9, height: 1.1, side: 0.85 },
+  inside: { dist: 14, height: 5, side: 0.35 },
 };
 
 function lerpVec(a, b, t, out) {
@@ -43,7 +43,8 @@ export function CameraDirector({ mode, target, playing }) {
     desired.current.copy(pos).add(back).add(lateral);
     desired.current.y = pos.y + spec.height;
     lerpVec(camera.position, desired.current, t, camera.position);
-    look.current.copy(pos).y += 1.4;
+    const lift = mode === 'product' ? 0.35 : 1.5;
+    look.current.copy(pos).y += lift;
     camera.lookAt(look.current);
   });
 
