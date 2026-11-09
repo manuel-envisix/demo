@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Ein Satz · Getzner</title>
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="assets/stage.css">
+</head>
+<body>
+<main class="stage" id="stage" data-phase="idle" data-page="false">
+  <p class="probe" hidden>Probe · Beispiel · nicht der Ring</p>
+  <header class="top">
+    <p class="brand">Getzner Werkstoffe</p>
+    <p class="place">Festspielhaus</p>
+  </header>
+  <section class="main">
+    <div class="ring-col">
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="-150 -150 300 300" role="img" aria-label="Ring">
+          <circle cx="0" cy="0" r="112" class="ring-guide" />
+          <path id="ring-path" class="ring-wave" />
+          <circle cx="0" cy="0" r="3.5" class="ring-core" />
+        </svg>
+      </div>
+      <p class="ring-caption">Bereit</p>
+    </div>
+    <div class="copy" id="copy">
+      <div class="poster">
+        <p class="kicker">Vocci Ring</p>
+        <h1>Eine Aufgabe.<br>Eine Seite.</h1>
+        <p class="ready">Bereit für den Ring</p>
+      </div>
+    </div>
+  </section>
+</main>
+<script type="module" src="assets/stage.js"></script>
+</body>
+</html>

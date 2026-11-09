@@ -1,25 +1,23 @@
 const VIENNA = "Europe/Vienna";
 
-export function formatDuration(ms: number): { value: string; unit: string } {
+export function formatDuration(ms) {
   const safe = Math.max(0, ms);
-  if (safe < 60_000) {
-    return { value: (safe / 1000).toFixed(1).replace(".", ","), unit: "s" };
-  }
+  if (safe < 60_000) return { value: (safe / 1000).toFixed(1).replace(".", ","), unit: "s" };
   const total = Math.round(safe / 1000);
   const minutes = Math.floor(total / 60);
   const seconds = total % 60;
   return { value: `${minutes}:${seconds.toString().padStart(2, "0")}`, unit: "min" };
 }
 
-export function formatStopwatch(ms: number): string {
+export function formatStopwatch(ms) {
   const total = Math.floor(Math.max(0, ms) / 1000);
   const minutes = Math.floor(total / 60);
   const seconds = total % 60;
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export function wallMs(speechEndedAt: string | null, receivedAt: string): number | null {
-  if (!speechEndedAt) return null;
+export function wallMs(speechEndedAt, receivedAt) {
+  if (!speechEndedAt || !receivedAt) return null;
   const end = Date.parse(speechEndedAt);
   const got = Date.parse(receivedAt);
   if (!Number.isFinite(end) || !Number.isFinite(got)) return null;
@@ -28,7 +26,7 @@ export function wallMs(speechEndedAt: string | null, receivedAt: string): number
   return delta;
 }
 
-export function viennaLabel(date: Date): { when: string; event: boolean } {
+export function viennaLabel(date) {
   const parts = new Intl.DateTimeFormat("de-AT", {
     timeZone: VIENNA,
     weekday: "short",
@@ -37,8 +35,7 @@ export function viennaLabel(date: Date): { when: string; event: boolean } {
     hour: "2-digit",
     minute: "2-digit",
   }).formatToParts(date);
-  const part = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((item) => item.type === type)?.value ?? "";
+  const part = (type) => parts.find((item) => item.type === type)?.value ?? "";
   const when = `${part("weekday").replace(".", "")} ${part("day")}. ${part("month").replace(".", "")} · ${part("hour")}:${part("minute")}`;
   const key = new Intl.DateTimeFormat("en-CA", {
     timeZone: VIENNA,

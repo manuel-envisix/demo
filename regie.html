@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Regie · Ein Satz</title>
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="assets/stage.css">
+</head>
+<body>
+<main class="regie">
+  <p class="regie-warn">Regie. Nicht auf die Leinwand.</p>
+  <header class="regie-head">
+    <h1>Ein Satz</h1>
+    <p id="status" class="regie-status">…</p>
+  </header>
+
+  <section class="regie-block">
+    <h2>Ablauf</h2>
+    <ol class="steps">
+      <li>Leinwand auf <a href="index.html">index.html</a>, diese Seite am Telefon lassen.</li>
+      <li>Aufgabe in den Ring sprechen.</li>
+      <li>Den Block von Composer im Ordner der Seite an <code>python3 uebernehmen.py</code> geben.</li>
+    </ol>
+    <div class="regie-row">
+      <button type="button" id="arm">Ich spreche jetzt</button>
+      <button type="button" id="copy-brief">Auftrag kopieren</button>
+    </div>
+    <p class="regie-note">Der Knopf gilt für denselben Browser. Die öffentliche Datei schreibt das Skript.</p>
+  </section>
+
+  <section class="regie-block">
+    <h2>Zum Vorlesen</h2>
+    <p class="regie-note">Einer der drei Sätze in den Ring. Erst der Rücklauf kommt auf die Wand.</p>
+    <div class="choices" id="lines"></div>
+  </section>
+
+  <section class="regie-block">
+    <h2>Auf die Wand</h2>
+    <textarea id="block" placeholder="SATZ: …" aria-label="Block vom Ring" spellcheck="false"></textarea>
+    <div class="regie-row">
+      <button type="button" id="paste">Einfügen</button>
+      <button type="button" class="primary" id="go" disabled>Auf die Leinwand</button>
+    </div>
+    <div class="preview" id="preview"></div>
+    <p class="regie-note">„Bis auf die Wand“ zählt vom Ende der Aufnahme bis zum Schreiben der Datei.</p>
+  </section>
+
+  <section class="regie-actions">
+    <button type="button" id="replay">Nochmal abspielen</button>
+    <button type="button" id="reset">Zurück auf Bereit</button>
+  </section>
+
+  <p id="message" class="regie-message"></p>
+  <p class="regie-note"><a id="page-link" href="gebaut.html" hidden>Seite ist öffentlich · gebaut.html</a></p>
+
+  <section class="regie-block">
+    <h2>Auftrag</h2>
+    <pre id="brief"></pre>
+    <p class="regie-note">Probe auf der Leinwand: Umschalttaste und P. Escape blendet sie aus. Eine echte Aufnahme ersetzt die Probe.</p>
+  </section>
+</main>
+<script type="module" src="assets/regie.js"></script>
+</body>
+</html>
