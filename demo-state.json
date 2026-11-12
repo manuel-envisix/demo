@@ -1,6 +1,6 @@
 {
-  "live-demo": true,
-  "experience": "live",
-  "updatedAt": "2026-11-12T06:50:14.863Z",
+  "live-demo": false,
+  "experience": "start",
+  "updatedAt": "2026-11-12T06:53:02.088Z",
   "note": "live-demo=false → Ring-Standard · live-demo=true + live → 3D-Erlebnis"
 }
